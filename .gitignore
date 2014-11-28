@@ -1,0 +1,7 @@
+#in eclipse TODO
+.settings
+target
+.classpath
+.project
+
+kafka-demo.iml
