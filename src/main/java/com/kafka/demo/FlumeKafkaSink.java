@@ -9,8 +9,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import kafka.javaapi.producer.Producer;
-import kafka.javaapi.producer.ProducerData;
 import kafka.message.Message;
+import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 import kafka.serializer.Encoder;
 import org.slf4j.Logger;
@@ -42,7 +42,6 @@ public class FlumeKafkaSink extends EventSink.Base {
 
 		Properties properties = new Properties();
 		properties.setProperty("zk.connect", this.zkConnect);
-		properties.setProperty("serializer.class", ByteEncoder.class.getName());
 		ProducerConfig config = new ProducerConfig(properties);
 		this.producer = new Producer<String, byte[]>(config);
 		LOG.info("Kafka sink successfully opened");
@@ -52,10 +51,13 @@ public class FlumeKafkaSink extends EventSink.Base {
 	public void append(Event e) throws IOException {
 		byte[] partition = e.get("kafka.partition.key");
 		if (partition == null) {
-			this.producer.send(new ProducerData<String, byte[]>(topic, e.getBody()));
+//			this.producer.send(new ProducerData<String, byte[]>(topic, e.getBody()));
+			this.producer.send(new KeyedMessage<String, byte[]>(topic,e.getBody()));
 		} else {
-			this.producer.send(new ProducerData<String, byte[]>(topic, new String(
-					partition, "UTF-8"), Lists.newArrayList(e.getBody())));
+//            this.producer.send(new ProducerData<String, byte[]>(topic, new String(
+//                    partition, "UTF-8"), Lists.newArrayList(e.getBody())));
+            this.producer.send(new KeyedMessage<String, byte[]>(topic, new String(
+                    partition, "UTF-8"), e.getBody()));
 		}
 	}
 
@@ -101,9 +103,4 @@ public class FlumeKafkaSink extends EventSink.Base {
 		return builders;
 	}
 
-	public static class ByteEncoder implements Encoder<byte[]> {
-		public Message toMessage(byte[] bytes) {
-			return new Message(bytes);
-		}
-	}
 }

@@ -9,7 +9,7 @@ import org.apache.commons.io.FileUtils;
 import com.kafka.utils.PropertiesLoader;
 
 public class Test {
-	public final static String PROJ_HOME = Producer.class.getClassLoader()
+	public final static String PROJ_HOME = ProducerTest.class.getClassLoader()
 			.getResource("").getPath().replace("classes/", "")
 			.replace("target/", "").replace("test-", "");
 
@@ -29,12 +29,14 @@ public class Test {
 	public static void run(List<String> json, List<String> json1) {
 		PropertiesLoader loader = new PropertiesLoader(
 				new String[] { "kafka.properties" });
-		Producer producerThread = new Producer(loader.getProperty(
-				"kafka.topic").split(",")[0], json);
+		String topic = loader.getProperty("kafka.topic").split(",")[0];
+		ProducerTest producerThread = new ProducerTest(topic, json);
 		producerThread.start();
 
-		Producer producerThread1 = new Producer(loader.getProperty(
-				"kafka.topic").split(",")[1], json1);
-		producerThread1.start();
+//		ProducerTest producerThread1 = new ProducerTest(loader.getProperty(
+//				"kafka.topic").split(",")[1], json1);
+//		producerThread1.start();
+		ConsumerTest consumerThread = new ConsumerTest(topic);
+		consumerThread.start();
 	}
 }

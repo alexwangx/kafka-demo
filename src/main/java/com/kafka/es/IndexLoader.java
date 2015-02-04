@@ -54,7 +54,7 @@ public class IndexLoader {
 		return props;
 	}
 
-	public KafkaStream<Message> createConsumer() throws IOException {
+	public KafkaStream<byte[], byte[]> createConsumer() throws IOException {
 		String topic = this.loader.getProperty("topic");
 		Properties props = createConsumerProperties(topic);
 		ConsumerConfig consumerConfig = new ConsumerConfig(props);
@@ -90,10 +90,11 @@ public class IndexLoader {
 		BulkRequestBuilder brb = client.prepareBulk();
 		KafkaStream message = f.createConsumer();
 		long i = 0L;
-		ConsumerIterator<Message> it = message.iterator();
+		ConsumerIterator<byte[], byte[]> it = message.iterator();
         while (it.hasNext()){
-        	String json = new String(
-					toByteArray(((Message) it.next().message()).payload()));
+//        	String json = new String(
+//					toByteArray(((Message) it.next().message()).payload()));
+			String json = new String(it.next().message());
 			Event e = (Event) JSON.parseObject(json, Event.class);
 			IndexRequestBuilder irb = client.prepareIndex(
 					f.loader.getProperty("index.name.prefix") + "_"
